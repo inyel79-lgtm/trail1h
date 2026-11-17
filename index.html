@@ -135,6 +135,16 @@
         <button type="button" class="btn-red" style="padding: 16px 24px; font-size: 16px; width: 100%; margin-bottom: 8px;" onclick="verifikasiLokasi()">1. Verifikasi Lokasi</button>
         <button type="button" class="btn-green" style="padding: 16px 24px; font-size: 16px; width: 100%; margin-bottom: 8px;" onclick="kirimQrIn()">2. Kirim Check-In</button>
         <button type="button" class="btn-purple" style="padding: 16px 24px; font-size: 16px; width: 100%; margin-bottom: 8px;" onclick="kirimQrOut()">3. Kirim Check-Out</button>
+        <button type="button" class="btn-cyan" style="padding: 16px 24px; font-size: 16px; width: 100%; margin-bottom: 8px;" onclick="(async () => {
+    const baseUrl = val('baseUrl').replace(/\/$/, '');
+    const targetId = parseInt(val('qrUnitId'));
+    log(`➡️ GET ${baseUrl}/unit (Filter ID: ${targetId})`);
+    const res = await fetch(`${baseUrl}/unit`, { headers: getHeaders(true) });
+    const json = await res.json();
+    const list = Array.isArray(json) ? json : (json.data || []);
+    const ketemu = list.find(u => parseInt(u.id) === targetId);
+    log(`⬅️ Hasil Unit ID ${targetId}:\n` + JSON.stringify(ketemu || 'ID tidak ditemukan', null, 2));
+})()">🏢 Cek Detail 1 Unit Kerja</button>
         </div>
 
     <!-- 2. CEK STATUS HARI INI, PROFIL & VERSI -->
@@ -227,7 +237,7 @@ async function sinkronTanggalOtomatis() {
       } else {
         document.getElementById('qrHash').value = '';
         const jamMenitWib = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit' }).format(new Date());
-        log(`⏰ [INFO] Di luar jam presensi 07-08/16-17 (Sekarang ${jamMenitWib} WIB), Token QR dikosongkan🙏(Jangan Di Tanya Lagi Langsung Pakai Aja).`);
+        log(`⏰ [INFO] Di luar jam presensi 07:00-08:00/16:00-17:00 (Sekarang ${jamMenitWib} WIB), Token QR dikosongkan🙏(Jangan Di Tanya Lagi Langsung Pakai Aja).`);
       }
       updatePreviewQr();
     }
