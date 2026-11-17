@@ -135,98 +135,6 @@
         <button type="button" class="btn-red" style="padding: 16px 24px; font-size: 16px; width: 100%; margin-bottom: 8px;" onclick="verifikasiLokasi()">1. Verifikasi Lokasi</button>
         <button type="button" class="btn-green" style="padding: 16px 24px; font-size: 16px; width: 100%; margin-bottom: 8px;" onclick="kirimQrIn()">2. Kirim Check-In</button>
         <button type="button" class="btn-purple" style="padding: 16px 24px; font-size: 16px; width: 100%; margin-bottom: 8px;" onclick="kirimQrOut()">3. Kirim Check-Out</button>
-         <button type="button" class="btn-cyan" style="padding: 16px 24px; font-size: 16px; width: 100%; margin-bottom: 8px;" onclick="(async () => {
-    const baseUrl = val('baseUrl').replace(/\/$/, '');
-    const targetId = parseInt(val('qrUnitId'));
-    log(`➡️ GET ${baseUrl}/unit (Filter ID: ${targetId})`);
-    const res = await fetch(`${baseUrl}/unit`, { headers: getHeaders(true) });
-    const json = await res.json();
-    const list = Array.isArray(json) ? json : (json.data || []);
-    const ketemu = list.find(u => parseInt(u.id) === targetId);
-    log(`⬅️ Hasil Unit ID ${targetId}:\n` + JSON.stringify(ketemu || 'ID tidak ditemukan', null, 2));
-})()">🏢 Cek Detail 1 Unit Kerja</button>
-        <button type="button" class="btn-amber" style="padding: 16px 24px; font-size: 16px; width: 100%; margin-bottom: 8px;" onclick="(async () => {
-    const baseUrl = document.getElementById('baseUrl').value.trim();
-    const token = document.getElementById('bearerToken').value.trim();
-    const deviceId = document.getElementById('deviceId').value.trim();
-    const konsol = document.querySelector('.console');
-    const log = (t) => { if(konsol){ konsol.textContent += t + '\n'; konsol.scrollTop = konsol.scrollHeight; } };
-
-    const kandidatRute = [
-  // Kategori Izin, Cuti & Dinas Luar
-  { u: '/user/izin', m: 'POST' }, { u: '/user/get_izin', m: 'POST' }, { u: '/user/history_izin', m: 'POST' },
-  { u: '/user/pengajuan_izin', m: 'POST' }, { u: '/user/izin_v2', m: 'POST' },
-  { u: '/user/cuti', m: 'POST' }, { u: '/user/get_cuti', m: 'POST' }, { u: '/user/history_cuti', m: 'POST' },
-  { u: '/user/pengajuan_cuti', m: 'POST' }, { u: '/user/cuti_v2', m: 'POST' },
-  { u: '/user/dinas_luar', m: 'POST' }, { u: '/user/dl', m: 'POST' }, { u: '/user/get_dl', m: 'POST' },
-  { u: '/user/sakit', m: 'POST' }, { u: '/user/get_sakit', m: 'POST' },
-  { u: '/user/keterangan', m: 'GET' }, { u: '/keterangan', m: 'GET' }, { u: '/jenis_izin', m: 'GET' },
-
-  // Kategori Jadwal, Libur & Rekap
-  { u: '/user/jadwal', m: 'GET' }, { u: '/user/get_jadwal', m: 'POST' }, { u: '/user/jadwal_kerja', m: 'GET' },
-  { u: '/jam_kerja', m: 'GET' }, { u: '/hari_libur', m: 'GET' }, { u: '/libur', m: 'GET' },
-  { u: '/user/rekap_harian', m: 'POST' }, { u: '/user/rekap_bulanan', m: 'POST' },
-  { u: '/user/get_rekap_bulanan', m: 'POST' }, { u: '/user/get_rekap_bulanan_v3', m: 'POST' },
-  { u: '/user/history_v2', m: 'POST' }, { u: '/user/get_history_v2', m: 'GET' },
-
-  // Kategori TPP & Kinerja
-  { u: '/user/tpp', m: 'POST' }, { u: '/user/get_tpp', m: 'POST' }, { u: '/user/get_tpp_v2', m: 'POST' },
-  { u: '/user/nilai_tpp', m: 'POST' }, { u: '/user/kinerja', m: 'POST' },
-
-  // Kategori Profil, Keamanan & Pengaturan
-  { u: '/user/update_profile', m: 'POST' }, { u: '/user/edit_profile', m: 'POST' },
-  { u: '/user/ganti_password', m: 'POST' }, { u: '/user/change_password', m: 'POST' }, { u: '/user/update_password', m: 'POST' },
-  { u: '/user/upload_foto', m: 'POST' }, { u: '/user/update_foto', m: 'POST' },
-  { u: '/user/notifikasi', m: 'GET' }, { u: '/notifikasi', m: 'GET' }, { u: '/user/notif', m: 'GET' },
-  { u: '/user/log', m: 'GET' }, { u: '/user/aktivitas', m: 'GET' },
-  { u: '/setting', m: 'GET' }, { u: '/settings', m: 'GET' }, { u: '/config', m: 'GET' },
-  { u: '/app_version', m: 'GET' }, { u: '/cek_versi', m: 'GET' }, { u: '/version_v2', m: 'GET' },
-
-    // Kategori Presensi Alternatif & Cek Perangkat
-  { u: '/user/qr_in_v2', m: 'POST' }, { u: '/user/qr_out_v2', m: 'POST' },
-  { u: '/user/absen_selfie', m: 'POST' }, { u: '/user/selfie', m: 'POST' },
-  { u: '/user/apel', m: 'POST' }, { u: '/user/qr_apel', m: 'POST' },
-  { u: '/user/lembur', m: 'POST' }, { u: '/user/qr_lembur', m: 'POST' },
-    { u: '/refresh', m: 'POST' }, { u: '/refresh_token', m: 'POST' },
-  { u: '/user/refresh', m: 'POST' }, { u: '/user/refresh_token', m: 'POST' },
-  { u: '/auth/refresh', m: 'POST' }, { u: '/api_refresh', m: 'POST' }
-];
-
-log(`🔎 Memulai pemindaian ${kandidatRute.length} kandidat rute API (hanya menampilkan yang aktif)...`);
-let ditemukan = 0;
-
-for (const item of kandidatRute) {
-  try {
-    const opsi = {
-      method: item.m,
-      headers: {
-        'Authorization': 'Bearer ' + token,
-        'x-device-id': deviceId,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    };
-    if (item.m === 'POST') {
-      opsi.body = JSON.stringify({ id: parseInt(val('userId')) || 2682 });
-    }
-    const r = await fetch(baseUrl + item.u, opsi);
-    if (r.status !== 404) {
-      ditemukan++;
-      let ket = '';
-      if (r.status === 200) ket = '✅ AKTIF (200 OK)';
-      else if (r.status === 422) ket = '🟡 AKTIF - Butuh Form Data (422)';
-      else if (r.status === 405) ket = '🟠 ADA - Ganti Metode GET/POST (405)';
-      else if (r.status === 401) ket = '🔒 Token Kedaluwarsa (401)';
-      else ket = `ℹ️ Status ${r.status}`;
-
-      log(`[${r.status}] ${item.m} ${item.u} -> ${ket}`);
-    }
-  } catch (e) {
-    // Abaikan error jaringan per item agar lanjut memindai
-  }
-}
-log(`🏁 Pemindaian selesai! Ditemukan ${ditemukan} endpoint aktif baru.`);
-})()">🔍 Scan Semua Rute API</button>
         </div>
 
     <!-- 2. CEK STATUS HARI INI, PROFIL & VERSI -->
@@ -236,7 +144,6 @@ log(`🏁 Pemindaian selesai! Ditemukan ${ditemukan} endpoint aktif baru.`);
         <button type="button" style="padding: 16px 24px; font-size: 16px; width: 100%; margin-bottom: 8px;" onclick="cekProfil()">Cek Profil Pegawai</button>
         <button type="button" class="btn-gray" style="padding: 16px 24px; font-size: 16px; width: 100%; margin-bottom: 8px;" onclick="cekVersi()">Cek Versi API</button>
         <button type="button" class="btn-cyan" style="padding: 16px 24px; font-size: 16px; width: 100%; margin-bottom: 8px;" onclick="cekSesiPerangkat()">🔑 Cek Sesi Perangkat</button> 
-        <button type="button" class="btn-amber" style="width: 100%; padding: 16px 24px; font-size: 16px; margin-top: 8px;" onclick="prosesRefreshToken()">🔄 Refresh Token</button>
         </div>
 
     <!-- 3. REKAPITULASI & NILAI TPP -->
